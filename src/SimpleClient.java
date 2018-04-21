@@ -10,24 +10,31 @@ public class SimpleClient {
 
 		Socket clientSocket = null;
 		DataOutputStream os = null;
+		BufferedReader is = null;
 
 		try {
 			clientSocket = new Socket(hostname,port);
 			os = new DataOutputStream(clientSocket.getOutputStream());
+			is = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 		}catch (Exception e) {
 			e.printStackTrace();
 		}
-		if (clientSocket == null || os == null) {
+		if (clientSocket == null || os == null || is == null) {
 			System.out.println("NULL POINTER(S)");
 			return;
 		}
 		try {
 			while (true) {
 				BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-				String keyboardInput = br.readLine();
-				os.writeBytes(keyboardInput+"\n");
+				if(br.ready()) {
+					String keyboardInput = br.readLine();
+					os.writeBytes(keyboardInput+"\n");
 				
-				if (keyboardInput.equals("exit")) break;
+					if (keyboardInput.equals("exit")) break;
+				}
+				if(is.ready()) {
+					System.out.println(is.readLine());
+				}
 			}
 			os.close();
 			clientSocket.close();
