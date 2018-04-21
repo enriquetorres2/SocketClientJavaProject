@@ -4,7 +4,7 @@ import java.net.*;
 public class SimpleClient {
 	public static void main(String[] args) {
 
-		String hostname = "localhost";
+		String hostname = "192.168.0.130";
 		int port = 6789;
 
 
