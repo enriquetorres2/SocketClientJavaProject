@@ -4,7 +4,7 @@ import java.net.*;
 public class SimpleClient {
 	public static void main(String[] args) {
 
-		String hostname = "192.168.0.130";
+		String hostname = "54.213.91.121";
 		int port = 6789;
 
 
@@ -24,6 +24,7 @@ public class SimpleClient {
 			return;
 		}
 		try {
+			System.out.println("Connected to server");
 			while (true) {
 				BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 				if(br.ready()) {
@@ -34,6 +35,7 @@ public class SimpleClient {
 				}
 				if(is.ready()) {
 					System.out.println(is.readLine());
+					
 				}
 			}
 			os.close();
