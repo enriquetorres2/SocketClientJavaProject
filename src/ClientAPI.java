@@ -2,7 +2,9 @@ import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.EventObject;
+import java.util.List;
 
 public class ClientAPI implements Runnable {
 
@@ -15,6 +17,7 @@ public class ClientAPI implements Runnable {
 	private String inMessage;
 	private String outMessage;
 	private boolean send;
+	private List<MessageListener> listeners = new ArrayList<MessageListener>();
 
 	public ClientAPI(String hostname, int port) {
 		this.hostname = hostname;
@@ -42,6 +45,13 @@ public class ClientAPI implements Runnable {
 		return inMessage;
 	}
 
+	public synchronized void addMessageListener(MessageListener l){
+		listeners.add(l);
+	}
+
+	public synchronized void removeMessageListener(MessageListener l){
+		listeners.remove(l);
+	}
 	@Override
 	public void run() {
 		// TODO Auto-generated method stub
@@ -70,11 +80,11 @@ public class ClientAPI implements Runnable {
 						if (outMessage.equals("exit")) break;
 						this.outMessage = "";
 					}
-					if(is.ready()) {
-						//System.out.println(is.readLine());
-						this.inMessage = is.readLine();
-						this.messageAvailable = true;
-					}
+//					if(is.ready()) {
+//						//System.out.println(is.readLine());
+//						this.inMessage = is.readLine();
+//						this.messageAvailable = true;
+//					}
 				}
 			}
 			this.os.close();
@@ -85,14 +95,19 @@ public class ClientAPI implements Runnable {
 	}
 
 	class MessageEvent extends EventObject {
-		public MessageEvent(Object source) {
+		private String str;
+		public MessageEvent(Object source, String message) {
 			super(source);
+			this.str = message;
+		}
+		public String message(){
+			return str;
 		}
 	}
 
 	interface MessageListener
 	{
-		public String messageRecieved(String message);
+		public String messageRecieved(MessageEvent event);
 	}
-	
+
 }
