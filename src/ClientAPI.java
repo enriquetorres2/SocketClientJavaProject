@@ -2,6 +2,7 @@ import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.util.EventObject;
 
 public class ClientAPI implements Runnable {
 
@@ -26,19 +27,21 @@ public class ClientAPI implements Runnable {
 		this.outMessage = "";
 		this.send = false;
 	}
-	
-	public boolean isMessage() {
+
+	public synchronized boolean isMessage() {
+		//this.notify();
 		return messageAvailable;
 	}
-	public void sendMessage(String str) {
+	public synchronized void sendMessage(String str) {
 		this.outMessage = str;
 		this.send = true;
+		this.notify();
 	}
-	public String readMessage() {
+	public synchronized String readMessage() {
 		this.messageAvailable = false;
 		return inMessage;
 	}
-	
+
 	@Override
 	public void run() {
 		// TODO Auto-generated method stub
@@ -55,19 +58,23 @@ public class ClientAPI implements Runnable {
 		}
 		try {
 			System.out.println("Connected to server");
-			while (true) {
-				if(this.send) {
-					//String keyboardInput = br.readLine();
-					this.os.writeBytes(outMessage+"\n");
-					this.outMessage = "";
-					this.send = false;
-					//if (keyboardInput.equals("exit")) break;
-					if (outMessage.equals("exit")) break;
-				}
-				if(is.ready()) {
-					//System.out.println(is.readLine());
-					this.inMessage = is.readLine();
-					this.messageAvailable = true;
+			synchronized(this) {
+				while (true) {
+					this.wait();
+					System.out.println("woke up");
+					if(this.send) {
+						//String keyboardInput = br.readLine();
+						this.os.writeBytes(outMessage+"\n");
+						this.send = false;
+						//if (keyboardInput.equals("exit")) break;
+						if (outMessage.equals("exit")) break;
+						this.outMessage = "";
+					}
+					if(is.ready()) {
+						//System.out.println(is.readLine());
+						this.inMessage = is.readLine();
+						this.messageAvailable = true;
+					}
 				}
 			}
 			this.os.close();
@@ -77,4 +84,15 @@ public class ClientAPI implements Runnable {
 		}
 	}
 
+	class MessageEvent extends EventObject {
+		public MessageEvent(Object source) {
+			super(source);
+		}
+	}
+
+	interface MessageListener
+	{
+		public String messageRecieved(String message);
+	}
+	
 }

@@ -11,6 +11,7 @@ public class APITester {
 			try {
 				if(br.ready()) {
 					String keyboardInput = br.readLine();
+					cl.sendMessage(keyboardInput);
 				}
 				if(cl.isMessage()) {
 					System.out.println(cl.readMessage());
